@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财务后台 - 数据安全管控流程</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 50%, #f5f0eb 100%);
+    color: #2d3748;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .header-path {
+    font-size: 13px;
+    color: #a0aec0;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a365d;
+    margin-bottom: 10px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 28px;
+  }
+  .header-highlights {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .highlight-item {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    padding: 14px 28px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    min-width: 180px;
+  }
+  .highlight-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2b6cb0;
+    margin-bottom: 4px;
+  }
+  .highlight-desc {
+    font-size: 12.5px;
+    color: #718096;
+  }
+
+  /* ========== 流程图区域 ========== */
+  .flowchart-section {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    padding: 40px 32px;
+    margin-bottom: 48px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2b6cb0;
+    margin-bottom: 36px;
+    text-align: center;
+    position: relative;
+  }
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 3px;
+    background: #bee3f8;
+    margin: 8px auto 0;
+    border-radius: 2px;
+  }
+
+  .flow-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    height: 80px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
+    position: relative;
+    flex-shrink: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .flow-node:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  }
+
+  .flow-node .step-num {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  .node-1 { background: #ebf8ff; border: 2px solid #90cdf4; color: #2b6cb0; }
+  .node-2 { background: #ebf4ff; border: 2px solid #90b8f4; color: #2c5282; }
+  .node-3 { background: #fff5f5; border: 2px solid #feb2b2; color: #c53030; }
+  .node-4 { background: #fffaf0; border: 2px solid #fbd38d; color: #c05621; }
+  .node-5 { background: #f0fff4; border: 2px solid #9ae6b4; color: #276749; }
+  .node-6 { background: #faf5ff; border: 2px solid #d6bcfa; color: #6b46c1; }
+
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .flow-arrow svg { width: 40px; height: 20px; }
+  .flow-arrow svg polyline { fill: none; stroke: #a0aec0; stroke-width: 2; }
+
+  /* 决策分支标注 */
+  .decision-label {
+    position: absolute;
+    font-size: 10px;
+    color: #e53e3e;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .decision-label.top { top: -16px; }
+  .decision-label.bottom { bottom: -16px; }
+
+  /* 打回箭头容器 */
+  .reject-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    gap: 4px;
+  }
+  .reject-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: relative;
+  }
+
+  /* ========== 详细说明区域 ========== */
+  .detail-section {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    padding: 40px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .detail-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .detail-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    border-left: 4px solid #bee3f8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .detail-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  }
+
+  .detail-card.card-1 { border-left-color: #90cdf4; }
+  .detail-card.card-2 { border-left-color: #90b8f4; }
+  .detail-card.card-3 { border-left-color: #feb2b2; }
+  .detail-card.card-4 { border-left-color: #fbd38d; }
+  .detail-card.card-5 { border-left-color: #9ae6b4; }
+  .detail-card.card-6 { border-left-color: #d6bcfa; }
+
+  .detail-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .card-1 .card-icon { background: #ebf8ff; }
+  .card-2 .card-icon { background: #ebf4ff; }
+  .card-3 .card-icon { background: #fff5f5; }
+  .card-4 .card-icon { background: #fffaf0; }
+  .card-5 .card-icon { background: #f0fff4; }
+  .card-6 .card-icon { background: #faf5ff; }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  .detail-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .detail-card li {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #4a5568;
+    padding: 4px 0;
+    padding-left: 18px;
+    position: relative;
+  }
+  .detail-card li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e0;
+    position: absolute;
+    left: 0;
+    top: 11px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .tag-red { background: #fff5f5; color: #e53e3e; }
+  .tag-yellow { background: #fffaf0; color: #dd6b20; }
+  .tag-green { background: #f0fff4; color: #38a169; }
+  .tag-gray { background: #edf2f7; color: #718096; }
+
+  .level-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+  .level-table th, .level-table td {
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  .level-table th {
+    background: #f7fafc;
+    font-weight: 600;
+    color: #4a5568;
+  }
+
+  /* ========== 图例 ========== */
+  .flow-legend {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+  }
+  .legend-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a0aec0;
+    margin-bottom: 12px;
+  }
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 36px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #4a5568;
+  }
+  .legend-item svg { flex-shrink: 0; }
+
+  /* ========== 响应式 ========== */
+  @media (max-width: 900px) {
+    .flow-wrapper {
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-arrow {
+      transform: rotate(90deg);
+      width: 20px;
+      height: 40px;
+    }
+    .flow-node { width: 180px; }
+    .decision-label.top { top: 0; left: 60px; }
+    .decision-label.bottom { bottom: 0; right: 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <div class="header-path">财务后台 / 数据安全管控</div>
+    <h1>财务后台数据安全管控方案</h1>
+    <p class="subtitle">目标：高等级数据不外泄，AI 只用低风险或已脱敏数据，结果输出前再做一次内容复核。</p>
+    <div class="header-highlights">
+      <div class="highlight-item">
+        <div class="highlight-title">入口分流</div>
+        <div class="highlight-desc">常规访问与 AI 访问分开处理</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-title">双重检测</div>
+        <div class="highlight-desc">先查表级别，再查结果内容</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-title">最终交付</div>
+        <div class="highlight-desc">输出脱敏后的分析结果</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 基本流程图 ==================== -->
+  <div class="flowchart-section">
+    <div class="section-title">基本流程图</div>
+
+    <svg viewBox="0 -20 700 400" style="width:100%;height:auto;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-gray" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0.5 L 10 5 L 0 9.5 Z" fill="#a0aec0"/>
+        </marker>
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0.5 L 10 5 L 0 9.5 Z" fill="#48bb78"/>
+        </marker>
+        <marker id="arrow-red" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0.5 L 10 5 L 0 9.5 Z" fill="#e53e3e"/>
+        </marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0.5 L 10 5 L 0 9.5 Z" fill="#dd6b20"/>
+        </marker>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0.5 L 10 5 L 0 9.5 Z" fill="#4299e1"/>
+        </marker>
+        <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+        </filter>
+      </defs>
+
+      <!-- 节点1: 分级脱敏 -->
+      <rect x="20" y="40" width="130" height="82" rx="10" fill="#ebf8ff" stroke="#90cdf4" stroke-width="1.6" filter="url(#shadow)"/>
+      <text x="85" y="57" text-anchor="middle" font-size="8.5" fill="#2b6cb0" opacity="0.6" font-weight="700">阶段一</text>
+      <text x="85" y="73" text-anchor="middle" font-size="12" fill="#2b6cb0" font-weight="700">分级脱敏</text>
+      <text x="85" y="88" text-anchor="middle" font-size="8" fill="#2b6cb0" opacity="0.45">建立映射表</text>
+      <text x="85" y="100" text-anchor="middle" font-size="8" fill="#2b6cb0" opacity="0.45">数据分为 1/2/3 级</text>
+
+      <line x1="150" y1="81" x2="193" y2="81" stroke="#a0aec0" stroke-width="1.6" marker-end="url(#arrow-gray)"/>
+
+      <!-- 节点2: 用户请求 -->
+      <rect x="195" y="40" width="130" height="82" rx="10" fill="#ebf4ff" stroke="#90b8f4" stroke-width="1.6" filter="url(#shadow)"/>
+      <text x="260" y="57" text-anchor="middle" font-size="8.5" fill="#2c5282" opacity="0.6" font-weight="700">阶段二</text>
+      <text x="260" y="73" text-anchor="middle" font-size="12" fill="#2c5282" font-weight="700">用户请求</text>
+      <text x="260" y="88" text-anchor="middle" font-size="8" fill="#2c5282" opacity="0.45">经过财务后台 API</text>
+      <text x="260" y="100" text-anchor="middle" font-size="8" fill="#2c5282" opacity="0.45">区分常规 / AI 访问</text>
+
+      <line x1="325" y1="81" x2="371" y2="81" stroke="#a0aec0" stroke-width="1.6" marker-end="url(#arrow-gray)"/>
+
+      <!-- Diamond: 判断访问类型 -->
+      <polygon points="410,46 449,81 410,116 371,81" fill="#fefcbf" stroke="#d69e2e" stroke-width="1.6" filter="url(#shadow)"/>
+      <text x="410" y="77" text-anchor="middle" font-size="9.5" fill="#744210" font-weight="700">访问类型</text>
+      <text x="410" y="91" text-anchor="middle" font-size="9.5" fill="#744210" font-weight="700">判断</text>
+
+      <line x1="449" y1="81" x2="488" y2="81" stroke="#dd6b20" stroke-width="1.6" marker-end="url(#arrow-orange)"/>
+      <text x="469" y="73" text-anchor="middle" font-size="9" fill="#dd6b20" font-weight="600">AI访问</text>
+
+      <!-- 节点3: 安全检测·第一道关卡 -->
+      <rect x="490" y="40" width="140" height="82" rx="10" fill="#fff5f5" stroke="#feb2b2" stroke-width="1.6" stroke-dasharray="5,3" filter="url(#shadow)"/>
+      <text x="560" y="55" text-anchor="middle" font-size="8.5" fill="#e53e3e" opacity="0.6" font-weight="700">阶段三</text>
+      <text x="560" y="69" text-anchor="middle" font-size="12" fill="#c53030" font-weight="700">安全检测</text>
+      <text x="560" y="82" text-anchor="middle" font-size="9" fill="#e53e3e" opacity="0.8">第一道关卡</text>
+      <text x="560" y="96" text-anchor="middle" font-size="8" fill="#c53030" opacity="0.45">检测 SQL 表级别</text>
+      <text x="560" y="108" text-anchor="middle" font-size="8" fill="#c53030" opacity="0.45">替换为孪生视图</text>
+
+      <line x1="410" y1="116" x2="410" y2="153" stroke="#4299e1" stroke-width="1.6" marker-end="url(#arrow-blue)"/>
+      <text x="438" y="138" text-anchor="start" font-size="9" fill="#4299e1" font-weight="600">常规访问</text>
+
+      <!-- 正常服务节点 -->
+      <rect x="350" y="155" width="120" height="58" rx="10" fill="#edf2f7" stroke="#a0aec0" stroke-width="1.6" filter="url(#shadow)"/>
+      <text x="410" y="180" text-anchor="middle" font-size="12" fill="#4a5568" font-weight="700">正常服务</text>
+      <text x="410" y="198" text-anchor="middle" font-size="8" fill="#718096" opacity="0.7">无需安全检测</text>
+
+      <line x1="560" y1="122" x2="560" y2="288" stroke="#48bb78" stroke-width="1.6" marker-end="url(#arrow-green)"/>
+      <text x="575" y="208" text-anchor="start" font-size="9" fill="#38a169" font-weight="600">通过</text>
+
+      <!-- 节点4: 安全检测·第二道关卡 -->
+      <rect x="490" y="290" width="140" height="82" rx="10" fill="#fffaf0" stroke="#fbd38d" stroke-width="1.6" stroke-dasharray="5,3" filter="url(#shadow)"/>
+      <text x="560" y="305" text-anchor="middle" font-size="8.5" fill="#c05621" opacity="0.6" font-weight="700">阶段四</text>
+      <text x="560" y="319" text-anchor="middle" font-size="12" fill="#c05621" font-weight="700">安全检测</text>
+      <text x="560" y="332" text-anchor="middle" font-size="9" fill="#c05621" opacity="0.8">第二道关卡</text>
+      <text x="560" y="346" text-anchor="middle" font-size="8" fill="#c05621" opacity="0.45">扫描身份证 / 手机号</text>
+      <text x="560" y="358" text-anchor="middle" font-size="8" fill="#c05621" opacity="0.45">等敏感数据</text>
+
+      <line x1="490" y1="331" x2="412" y2="331" stroke="#48bb78" stroke-width="1.6" marker-end="url(#arrow-green)"/>
+      <text x="451" y="324" text-anchor="middle" font-size="9" fill="#38a169" font-weight="600">通过</text>
+
+      <!-- 节点5: 数据交付 -->
+      <rect x="270" y="290" width="140" height="82" rx="10" fill="#f0fff4" stroke="#9ae6b4" stroke-width="1.6" filter="url(#shadow)"/>
+      <text x="340" y="307" text-anchor="middle" font-size="8.5" fill="#276749" opacity="0.6" font-weight="700">阶段五</text>
+      <text x="340" y="323" text-anchor="middle" font-size="12" fill="#276749" font-weight="700">数据交付</text>
+      <text x="340" y="338" text-anchor="middle" font-size="8" fill="#276749" opacity="0.45">输出脱敏后的</text>
+      <text x="340" y="350" text-anchor="middle" font-size="8" fill="#276749" opacity="0.45">AI 分析结果</text>
+
+      <line x1="270" y1="331" x2="182" y2="331" stroke="#a0aec0" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#arrow-gray)"/>
+
+      <!-- 节点6: 解密平台 -->
+      <rect x="40" y="290" width="140" height="82" rx="10" fill="#faf5ff" stroke="#d6bcfa" stroke-width="1.6" stroke-dasharray="5,3" filter="url(#shadow)"/>
+      <text x="110" y="305" text-anchor="middle" font-size="8.5" fill="#6b46c1" opacity="0.6" font-weight="700">阶段六</text>
+      <text x="110" y="321" text-anchor="middle" font-size="12" fill="#6b46c1" font-weight="700">解密平台</text>
+      <text x="110" y="334" text-anchor="middle" font-size="9" fill="#805ad5" opacity="0.7">(按需)</text>
+      <text x="110" y="348" text-anchor="middle" font-size="8" fill="#6b46c1" opacity="0.45">反脱敏还原数据</text>
+      <text x="110" y="360" text-anchor="middle" font-size="8" fill="#6b46c1" opacity="0.45">需额外权限</text>
+
+      <!-- 打回箭头 -->
+      <path d="M 548 40 L 548 15 Q 548 5, 538 5 L 267 5 Q 260 5, 260 15 L 260 40" fill="none" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+      <text x="400" y="2" text-anchor="middle" font-size="8.5" fill="#e53e3e" font-weight="600">未通过，打回</text>
+
+      <path d="M 548 290 L 548 248 Q 548 238, 538 238 L 267 238 Q 260 238, 260 228 L 260 122" fill="none" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+      <text x="400" y="234" text-anchor="middle" font-size="8.5" fill="#e53e3e" font-weight="600">未通过，打回</text>
+    </svg>
+
+    <!-- 图例 -->
+    <div class="flow-legend">
+      <div class="legend-title">图例</div>
+      <div class="legend-items">
+        <div class="legend-item">
+          <svg width="40" height="16"><line x1="2" y1="8" x2="28" y2="8" stroke="#a0aec0" stroke-width="2"/><polygon points="28,3 38,8 28,13" fill="#a0aec0"/></svg>
+          <span>常规流转</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><line x1="2" y1="8" x2="28" y2="8" stroke="#48bb78" stroke-width="2"/><polygon points="28,3 38,8 28,13" fill="#48bb78"/></svg>
+          <span>检测通过</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><line x1="2" y1="8" x2="28" y2="8" stroke="#e53e3e" stroke-width="1.8" stroke-dasharray="4,3"/><polygon points="28,3 38,8 28,13" fill="#e53e3e"/></svg>
+          <span>未通过，打回</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><rect x="4" y="2" width="32" height="12" rx="3" fill="#f7fafc" stroke="#a0aec0" stroke-width="1.5"/></svg>
+          <span>标准步骤</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><rect x="4" y="2" width="32" height="12" rx="3" fill="#f7fafc" stroke="#a0aec0" stroke-width="1.5" stroke-dasharray="4,2"/></svg>
+          <span>检测关卡 / 可选</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><line x1="2" y1="8" x2="28" y2="8" stroke="#a0aec0" stroke-width="2" stroke-dasharray="5,3"/><polygon points="28,3 38,8 28,13" fill="#a0aec0"/></svg>
+          <span>可选流转</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><polygon points="20,1 38,8 20,15 2,8" fill="#fefcbf" stroke="#d69e2e" stroke-width="1.5"/></svg>
+          <span>决策判断</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><line x1="2" y1="8" x2="28" y2="8" stroke="#dd6b20" stroke-width="2"/><polygon points="28,3 38,8 28,13" fill="#dd6b20"/></svg>
+          <span>AI 访问分支</span>
+        </div>
+        <div class="legend-item">
+          <svg width="40" height="16"><line x1="2" y1="8" x2="28" y2="8" stroke="#4299e1" stroke-width="2"/><polygon points="28,3 38,8 28,13" fill="#4299e1"/></svg>
+          <span>常规访问分支</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 流程详细说明 ==================== -->
+  <div class="detail-section">
+    <div class="section-title">流程详细说明</div>
+
+    <div class="detail-cards">
+      <div class="detail-card card-1">
+        <div class="card-header">
+          <div class="card-icon">🗂</div>
+          <div class="card-title">一、分级脱敏阶段</div>
+        </div>
+        <ul>
+          <li>建立映射表，包含字段：<code>database_name</code>、<code>table_name</code>、<code>level</code>、<code>luanshen_table_name</code>、<code>union_id</code></li>
+          <li>
+            数据级别划分：
+            <table class="level-table">
+              <tr><th>级别</th><th>说明</th><th>策略</th></tr>
+              <tr><td><span class="tag tag-red">1级</span></td><td>最高级</td><td>禁止数据外泄</td></tr>
+              <tr><td><span class="tag tag-yellow">2级</span></td><td>次高级</td><td>脱敏后可传出</td></tr>
+              <tr><td><span class="tag tag-green">3级</span></td><td>普通级</td><td>正常传出</td></tr>
+            </table>
+          </li>
+        </ul>
+      </div>
+
+      <div class="detail-card card-2">
+        <div class="card-header">
+          <div class="card-icon">👤</div>
+          <div class="card-title">二、用户请求阶段</div>
+        </div>
+        <ul>
+          <li>用户使用 <strong>OpenClaw</strong> 提问时，请求经过财务后台 API</li>
+          <li>开发根据请求 IP 判断是 <span class="tag tag-gray">常规访问</span> 还是 <span class="tag tag-yellow">AI访问</span>（当前AI为OpenClaw）</li>
+          <li>AI访问走独立服务链路，分配数据库 <strong>只读账号</strong></li>
+        </ul>
+      </div>
+
+      <div class="detail-card card-3">
+        <div class="card-header">
+          <div class="card-icon">🛡</div>
+          <div class="card-title">三、安全检测 · 第一道关卡</div>
+        </div>
+        <ul>
+          <li>AI发起查询时，检测 SQL 中涉及的表级别：
+            <br>— 级别3 或 级别2且已脱敏 → <span class="tag tag-green">放行</span>
+            <br>— 级别1 或 级别2且未脱敏 → <span class="tag tag-red">打回</span>
+          </li>
+          <li>放行后，将 SQL 中需要脱敏的表替换为 <strong>孪生视图</strong>，修改 SQL 并执行，获取脱敏后的数据文件</li>
+        </ul>
+      </div>
+
+      <div class="detail-card card-4">
+        <div class="card-header">
+          <div class="card-icon">🔍</div>
+          <div class="card-title">四、安全检测 · 第二道关卡</div>
+        </div>
+        <ul>
+          <li>对数据文件进行二次扫描，检查是否包含以下敏感信息：</li>
+          <li style="padding-left:32px;">
+            <span class="tag tag-red">身份证号</span>&nbsp;
+            <span class="tag tag-red">手机号</span>&nbsp;
+            <span class="tag tag-red">公司主体</span>&nbsp;
+            等极敏感数据
+          </li>
+          <li>若发现敏感数据 → <span class="tag tag-red">打回</span>，阻止数据交付</li>
+        </ul>
+      </div>
+
+      <div class="detail-card card-5">
+        <div class="card-header">
+          <div class="card-icon">📊</div>
+          <div class="card-title">五、数据交付阶段</div>
+        </div>
+        <ul>
+          <li>通过全部安全检测后，用户将获得 <strong>脱敏后数据</strong> 的AI分析结果</li>
+          <li>数据全程未暴露原始敏感信息</li>
+        </ul>
+      </div>
+
+      <div class="detail-card card-6">
+        <div class="card-header">
+          <div class="card-icon">🔓</div>
+          <div class="card-title">六、解密平台（按需）</div>
+        </div>
+        <ul>
+          <li>提供独立的解密平台，用户可将脱敏分析结果传入进行 <strong>反脱敏</strong></li>
+          <li>此功能按需开放，需额外权限控制</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
